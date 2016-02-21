@@ -1,2 +1,3 @@
 # mumsy
-A tool to map the usage of words like "mum", "mom" and "mam" on Twitter.
+
+A tool to take in and save live tweets from the island of Ireland.
