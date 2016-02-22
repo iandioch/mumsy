@@ -1,9 +1,11 @@
 import tweepy
 from tweepy import OAuthHandler
 import json
-import sqlite3
+#import sqlite3
 import sys
 from datetime import datetime 
+import bson
+import gearman
 
 # read oauth_data from file laid out as follows:
 # consumer key
@@ -48,10 +50,13 @@ class IrelandListener(tweepy.StreamListener):
         if num_tweets >= 100000 or datetime.now().hour >= 14:
             database_connection.close()
             sys.exit()"""
+        bson_data = bson.BSON.encode(status._json)
+        gearman.submit_job('db-add', 'tweets', str(datetime.day) + "/" + str(datetime.month) + "/" + str(datetime.year), bson_data)
+
         num_tweets += 1
         tweets_this_min += 1
         if datetime.now().timestamp() - last_check_time >= 60:
-            print(str(tweets_this_min) + " tweets this min")
+            print(str(tweets_this_min) + " tweets this min, total = " + str(num_tweets))
             tweets_this_min = 0
             last_check_time = datetime.now().timestamp()
 
