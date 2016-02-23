@@ -5,7 +5,8 @@ import json
 import sys
 from datetime import datetime 
 import bson
-import gearman
+from pymongo import MongoClient
+#import gearman
 
 # read oauth_data from file laid out as follows:
 # consumer key
@@ -21,6 +22,9 @@ auth.set_access_token(oauth_data[2], oauth_data[3])
 
 api = tweepy.API(auth)
 
+db_client = MongoClient('localhost', 27017)
+collection = db_client['tweets']['irish-ge']
+#gearman_client = gearman.GearmanClient(['localhost:4730'])
 
 """database_connection = sqlite3.connect('irish_tweets.db')
 db_cursor = database_connection.cursor()
@@ -30,6 +34,8 @@ num_tweets = 0
 tweets_this_min = 0
 
 last_check_time = datetime.now().timestamp()
+
+print(last_check_time)
 
 class IrelandListener(tweepy.StreamListener):
     def on_status(self, status):
@@ -50,8 +56,10 @@ class IrelandListener(tweepy.StreamListener):
         if num_tweets >= 100000 or datetime.now().hour >= 14:
             database_connection.close()
             sys.exit()"""
+        #print(status._json)
+        collection.insert_one(status._json)
         bson_data = bson.BSON.encode(status._json)
-        gearman.submit_job('db-add', 'tweets', str(datetime.day) + "/" + str(datetime.month) + "/" + str(datetime.year), bson_data)
+        #gearman_client.submit_job('db-add', 'tweets', str(datetime.day) + "/" + str(datetime.month) + "/" + str(datetime.year), bson_data)
 
         num_tweets += 1
         tweets_this_min += 1
@@ -67,7 +75,7 @@ class IrelandListener(tweepy.StreamListener):
         print('Timeout')
 
 ireland_listener = IrelandListener()
-ireland_stream = tweepy.Stream(auth=api.auth, listener=ireland_listener)
+ireland_stream = tweepy.streaming.Stream(auth=api.auth, listener=ireland_listener)
 #ireland_stream.filter(locations=[11.0,56.0,7.0,51.0])
 #ireland_stream.filter(languages='en', locations=[-6.38,49.87,1.77,55.81])
 #ireland_stream.filter(languages=['en'], track=['mam,mum,mom'], locations=[11.0,56.0,7.0,51.0])
