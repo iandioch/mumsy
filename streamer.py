@@ -35,20 +35,21 @@ class IrelandListener(tweepy.StreamListener):
         global num_tweets
         global last_check_time
         global tweets_this_min
-        print('.', end='')
         if status is None:
             print("\nstatus is None, skipping")
             return
         if "Ireland" not in status._json["place"]["country"] and status._json["place"]["country_code"] is not "IE":
-            print("\nTweet not in Ireland ('" + str(status._json["place"]["full_name"]) + ": " +str(status._json["place"]["country"]) + "'), skipping")
+            #print("\nTweet not in Ireland ('" + str(status._json["place"]["full_name"]) + ": " +str(status._json["place"]["country"]) + "'), skipping")
+            print('X', end='', flush=True)
             return
+        print('.', end='', flush=True)
         collection.insert_one(status._json)
         bson_data = bson.BSON.encode(status._json)
 
         num_tweets += 1
         tweets_this_min += 1
         if datetime.now().timestamp() - last_check_time >= 60:
-            print("\n" + str(tweets_this_min) + " tweets this min, total = " + str(num_tweets))
+            print("\n" + str(tweets_this_min) + " Irish tweets this min, total = " + str(num_tweets))
             tweets_this_min = 0
             last_check_time = datetime.now().timestamp()
 
