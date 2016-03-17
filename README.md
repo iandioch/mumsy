@@ -4,7 +4,7 @@ A tool to take in and save live tweets from the island of Ireland.
 
 The tool requires Mongodb to be running.
 
-It is written in Python 2, and has the following dependencies:
+It is written in Python 3, and has the following dependencies:
 
 - tweepy
 - pymongo
